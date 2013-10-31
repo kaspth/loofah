@@ -5,13 +5,12 @@ require 'cgi'
 module Loofah
   module HTML5 # :nodoc:
     module Scrub
-
       CONTROL_CHARACTERS = /[`\u0000-\u0020\u007f\u0080-\u0101]/
 
       class << self
 
         def allowed_element? element_name
-          ::Loofah::HTML5::WhiteList::ALLOWED_ELEMENTS_WITH_LIBXML2.include? element_name
+          WhiteList.allowed_element? element_name
         end
 
         #  alternative implementation of the html5lib attribute scrubbing algorithm
@@ -22,22 +21,22 @@ module Loofah
                         else
                           attr_node.node_name
                         end
-            unless WhiteList::ALLOWED_ATTRIBUTES.include?(attr_name)
+            unless WhiteList.allowed_element?(attr_name)
               attr_node.remove
               next
             end
-            if WhiteList::ATTR_VAL_IS_URI.include?(attr_name)
+            if WhiteList.uri_attribute?(attr_name)
               # this block lifted nearly verbatim from HTML5 sanitization
               val_unescaped = CGI.unescapeHTML(attr_node.value).gsub(CONTROL_CHARACTERS,'').downcase
-              if val_unescaped =~ /^[a-z0-9][-+.a-z0-9]*:/ && ! WhiteList::ALLOWED_PROTOCOLS.include?(val_unescaped.split(WhiteList::PROTOCOL_SEPARATOR)[0])
+              if val_unescaped =~ /^[a-z0-9][-+.a-z0-9]*:/ && ! WhiteList.allowed_protocol?(val_unescaped.split(WhiteList::PROTOCOL_SEPARATOR)[0])
                 attr_node.remove
                 next
               end
             end
-            if WhiteList::SVG_ATTR_VAL_ALLOWS_REF.include?(attr_name)
+            if WhiteList.svg_allows_remote_reference?(attr_name)
               attr_node.value = attr_node.value.gsub(/url\s*\(\s*[^#\s][^)]+?\)/m, ' ') if attr_node.value
             end
-            if WhiteList::SVG_ALLOW_LOCAL_HREF.include?(node.name) && attr_name == 'xlink:href' && attr_node.value =~ /^\s*[^#\s].*/m
+            if WhiteList.svg_allows_local_reference?(node.name) && attr_name == 'xlink:href' && attr_node.value =~ /^\s*[^#\s].*/m
               attr_node.remove
               next
             end
@@ -64,14 +63,14 @@ module Loofah
           style.scan(/([-\w]+)\s*:\s*([^:;]*)/) do |prop, val|
             next if val.empty?
             prop.downcase!
-            if WhiteList::ALLOWED_CSS_PROPERTIES.include?(prop)
+            if WhiteList.allowed_css_property?(prop)
               clean << "#{prop}: #{val};"
-            elsif WhiteList::SHORTHAND_CSS_PROPERTIES.include?(prop.split('-')[0])
+            elsif WhiteList.shorthand_css_property?(prop.split('-')[0])
               clean << "#{prop}: #{val};" unless val.split().any? do |keyword|
-                !WhiteList::ALLOWED_CSS_KEYWORDS.include?(keyword) &&
+                !WhiteList.allowed_css_keyword?(keyword) &&
                   keyword !~ /\A(#[0-9a-f]+|rgb\(\d+%?,\d*%?,?\d*%?\)?|\d{0,2}\.?\d{0,2}(cm|em|ex|in|mm|pc|pt|px|%|,|\))?)\z/
               end
-            elsif WhiteList::ALLOWED_SVG_PROPERTIES.include?(prop)
+            elsif WhiteList.allowed_svg_property?(prop)
               clean << "#{prop}: #{val};"
             end
           end
