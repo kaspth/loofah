@@ -21,7 +21,7 @@ module Loofah
                         else
                           attr_node.node_name
                         end
-            unless WhiteList.allowed_element?(attr_name)
+            unless WhiteList.allowed_attribute?(attr_name)
               attr_node.remove
               next
             end
