@@ -168,50 +168,50 @@ module Loofah
       # additional tags we should consider safe since we have libxml2 fixing up our documents.
       TAGS_SAFE_WITH_LIBXML2 = Set.new %w[html head body]
       ALLOWED_ELEMENTS_WITH_LIBXML2 = ALLOWED_ELEMENTS + TAGS_SAFE_WITH_LIBXML2
+
+      class << self
+        def allowed_element?(element_name)
+          ALLOWED_ELEMENTS_WITH_LIBXML2.include? element_name
+        end
+
+        def allowed_attribute?(name)
+          ALLOWED_ATTRIBUTES.include? name
+        end
+
+        def uri_attribute?(name)
+          ATTR_VAL_IS_URI.include? name
+        end
+
+        def allowed_protocol?(name)
+          ALLOWED_PROTOCOLS.include? name
+        end
+
+        def svg_allows_remote_reference?(name)
+          SVG_ATTR_VAL_ALLOWS_REF.include? name
+        end
+
+        def svg_allows_local_reference?(name)
+          SVG_ALLOW_LOCAL_HREF.include? name
+        end
+
+        def allowed_svg_property?(property)
+          ALLOWED_SVG_PROPERTIES.include? property
+        end
+
+        def allowed_css_property?(property)
+          ALLOWED_CSS_PROPERTIES.include? property
+        end
+
+        def shorthand_css_property?(property)
+          SHORTHAND_CSS_PROPERTIES.include? property
+        end
+
+        def allowed_css_keyword?(keyword)
+          ALLOWED_CSS_KEYWORDS.include? keyword
+        end
+      end
     end
 
     ::Loofah::MetaHelpers.add_downcased_set_members_to_all_set_constants ::Loofah::HTML5::WhiteList
-
-    class << self
-      def allowed_element?(element_name)
-        ALLOWED_ELEMENTS_WITH_LIBXML2.include? element_name
-      end
-
-      def allowed_attribute?(name)
-        ALLOWED_ATTRIBUTES.include? name
-      end
-
-      def uri_attribute?(name)
-        ATTR_VAL_IS_URI.include? name
-      end
-
-      def allowed_protocol?(name)
-        ALLOWED_PROTOCOLS.include? name
-      end
-
-      def svg_allows_remote_reference?(name)
-        SVG_ATTR_VAL_ALLOWS_REF.include? name
-      end
-
-      def svg_allows_local_reference?(name)
-        SVG_ALLOW_LOCAL_HREF.include? name
-      end
-
-      def allowed_svg_property?(property)
-        ALLOWED_SVG_PROPERTIES.include? property
-      end
-
-      def allowed_css_property?(property)
-        ALLOWED_CSS_PROPERTIES.include? property
-      end
-
-      def shorthand_css_property?(property)
-        SHORTHAND_CSS_PROPERTIES.include? property
-      end
-
-      def allowed_css_keyword?(keyword)
-        ALLOWED_CSS_KEYWORDS.include? keyword
-      end
-    end
   end
 end
