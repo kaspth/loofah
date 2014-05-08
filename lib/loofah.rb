@@ -1,6 +1,7 @@
 $LOAD_PATH.unshift(File.expand_path(File.dirname(__FILE__))) unless $LOAD_PATH.include?(File.expand_path(File.dirname(__FILE__)))
 
 require 'nokogiri'
+require 'nokogumbo'
 
 require 'loofah/metahelpers'
 require 'loofah/elements'
@@ -74,5 +75,19 @@ module Loofah
       Loofah.xml_document(string_or_io).scrub!(method)
     end
 
+    def use_nokogumbo!
+      class << Loofah
+        undef_method :document
+        undef_method :fragment
+
+        def document(*args, &block)
+          Nokogiri::HTML5(*args, &block)
+        end
+
+        def fragment(*args, &block)
+         document(*args, &block).at('html/body') # what nokogiri does
+        end
+      end
+    end
   end
 end
